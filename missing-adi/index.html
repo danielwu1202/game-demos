@@ -462,26 +462,37 @@ function showTab(which){
    全部由 S.place（在哪個地點）和 S.talk（正在進行的對話）決定畫面，
    所以切到線索板再回來，對話會停在原處。 */
 const ART_EXT = ['webp','png','jpg'];
-function loadArt(img, name, ph){ // 依序試 webp → png → jpg；載入成功就收起佔位，全都沒有就留著佔位
-  let i = 0;
-  img.onload = () => { if (ph) ph.hidden = true; };
-  img.onerror = () => { if (++i < ART_EXT.length) img.src = 'assets/' + name + '.' + ART_EXT[i]; else img.remove(); };
-  img.src = 'assets/' + name + '.' + ART_EXT[0];
+const ART = {};
+function art(name){ // 依序試 webp → png → jpg，回傳 Promise（找到的網址，或 null）。同一張圖只找一次，之後直接用快取
+  return ART[name] || (ART[name] = new Promise(res => {
+    let i = 0; const im = new Image();
+    im.onload = () => res(im.src);
+    im.onerror = () => { if (++i < ART_EXT.length) im.src = 'assets/' + name + '.' + ART_EXT[i]; else res(null); };
+    im.src = 'assets/' + name + '.' + ART_EXT[0];
+  }));
+}
+function loadArt(img, name, ph){ // 背景用：找到圖才顯示；全都沒有才露出色塊佔位（載入中不顯示佔位，免得閃一下）
+  art(name).then(src => { if (src) img.src = src; else { img.remove(); if (ph) ph.hidden = false; } });
+}
+function preload(p){ // 先載好這個地點人物的所有表情、以及相鄰地點的背景，換表情與換地點時就不用等
+  if (p.npc) Object.keys(CHARS[p.npc].moods).forEach(m => art('char-' + p.npc + '-' + m));
+  [PLACES[PLACES.indexOf(p) - 1], PLACES[PLACES.indexOf(p) + 1]].forEach(q => q && art('bg-' + q.bg));
 }
 const focusIn = sel => { const e = $(sel); if (e) e.focus({preventScroll:true}); };
 
 function buildStage(p){
   const dir = S.shown < 0 ? '' : S.place > S.shown ? 'from-r' : 'from-l';
-  S.shown = S.place; S.who = null;
+  S.shown = S.place; S.who = null; whoSeq++;
   $('#stage').style.setProperty('--h', p.hue);
   $('#stage').setAttribute('aria-label', p.name);
   const view = $('#stage-view');
   view.className = 'stage-view';
-  view.innerHTML = `<div class="bg-ph"><span>${p.name}</span><small>場景圖待補　assets/bg-${p.bg}.webp</small></div><img class="bg" alt="">`;
+  view.innerHTML = `<div class="bg-ph" hidden><span>${p.name}</span><small>場景圖待補　assets/bg-${p.bg}.webp</small></div><img class="bg" alt="">`;
   $('#who-art').innerHTML = ''; $('#who-art').hidden = true;
   const bg = view.querySelector('img.bg');
   bg.style.objectPosition = p.pos || '50% 50%'; // 圖不是 9:16 時，用 pos 決定手機上要看圖的哪一塊
   loadArt(bg, 'bg-' + p.bg, view.querySelector('.bg-ph'));
+  preload(p);
   if (dir){ void view.offsetWidth; view.classList.add(dir); }
 }
 
@@ -493,19 +504,33 @@ function whoNow(p){ // 舞台上該站的人：對話中是最近一個開口的
   return p.npc ? {key:p.npc, mood:'calm'} : null;
 }
 
+let whoSeq = 0;
 function renderWho(p){
   const box = $('#who-art'), w = whoNow(p);
-  if (!w){ box.hidden = true; S.who = null; return; }
+  if (!w){ box.hidden = true; S.who = null; whoSeq++; return; }
   const m = CHARS[w.key].moods[w.mood] ? w.mood : 'calm';
   const T = S.talk;
   box.classList.toggle('dim', !!T && !T.result && DIALOGUES[T.id].lines[T.i].c === 'me'); // 玩家發言時，人物淡一點
-  if (S.who === w.key + ':' + m){ box.hidden = false; return; }
-  S.who = w.key + ':' + m;
+  const id = w.key + ':' + m;
+  if (S.who === id){ box.hidden = false; return; }
+  const sameChar = !!S.who && S.who.split(':')[0] === w.key; // 同一個人只是換表情：不重播進場動畫
+  S.who = id; const seq = ++whoSeq;
   const ch = CHARS[w.key];
-  box.innerHTML = `<div class="char-ph" style="--h:${ch.hue}"><svg viewBox="0 0 120 160" aria-hidden="true"><circle cx="60" cy="54" r="26"/><path d="M12 160c0-34 20-58 48-58s48 24 48 58z"/></svg><small>${ch.name}・${ch.moods[m]}　assets/char-${w.key}-${m}.webp</small></div><img alt="">`;
-  loadArt(box.querySelector('img'), 'char-' + w.key + '-' + m, box.querySelector('.char-ph'));
-  box.hidden = false;
-  box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap');
+  art('char-' + w.key + '-' + m).then(src => {
+    if (seq !== whoSeq) return; // 等圖的時候又換了，這次作廢
+    let el;
+    if (src){ el = new Image(); el.alt = ''; el.src = src; }
+    else { // 圖檔不存在才用色塊佔位
+      el = document.createElement('div'); el.className = 'char-ph'; el.style.setProperty('--h', ch.hue);
+      el.innerHTML = `<svg viewBox="0 0 120 160" aria-hidden="true"><circle cx="60" cy="54" r="26"/><path d="M12 160c0-34 20-58 48-58s48 24 48 58z"/></svg><small>${ch.name}・${ch.moods[m]}　assets/char-${w.key}-${m}.webp</small>`;
+    }
+    const show = () => { // 新圖解碼好才換，舊圖在這之前一直留在畫面上
+      if (seq !== whoSeq) return;
+      box.innerHTML = ''; box.appendChild(el); box.hidden = false;
+      if (!sameChar){ box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap'); }
+    };
+    if (src && el.decode) el.decode().then(show, show); else show();
+  });
 }
 
 const topicOf = id => LOCS.find(l => l.id === id);
