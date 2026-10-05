@@ -38,15 +38,15 @@
 }
 [hidden]{display:none!important}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;-webkit-text-size-adjust:100%;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.app{max-width:460px;margin:0 auto;padding-block:12px 96px;display:flex;flex-direction:column;gap:14px}
+body{margin:0;-webkit-text-size-adjust:100%;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;min-height:100dvh;display:flex;flex-direction:column;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{flex:1;min-height:0;width:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column}
 button{font:inherit;color:inherit}
 button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 ::selection{background:var(--marker);color:var(--marker-ink)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 /* 截稿倒數 */
-.deadline{position:sticky;top:0;z-index:5;background:var(--bar);color:var(--bar-ink);border-bottom:1px solid var(--line);border-radius:0 0 14px 14px;margin-inline:-16px;padding:max(10px,env(safe-area-inset-top,0px)) 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.deadline{position:sticky;top:0;z-index:5;background:var(--bar);color:var(--bar-ink);border-bottom:1px solid var(--line);border-radius:0 0 14px 14px;padding:max(10px,env(safe-area-inset-top,0px)) 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .deadline .case{font-family:var(--serif);font-weight:900;font-size:17px}
 .clockbox{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .hours{font-family:var(--mono);font-weight:600;font-size:20px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
@@ -70,7 +70,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .loc.locked{cursor:default;border-style:dashed}
 .loc.locked .loc-name,.loc.locked .cost{opacity:.6}
 .loc.locked .cost{border-color:var(--muted);color:var(--muted)}
-.loc.done{cursor:default}
+.loc.done{cursor:pointer}
 .loc.done .loc-name{opacity:.6}
 .loc.done .cost{border-color:transparent;color:var(--muted)}
 
@@ -109,7 +109,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 @media (hover:hover){.btn:not(:disabled):hover{background:color-mix(in srgb,var(--ink) 6%,var(--surface))}.btn.primary:not(:disabled):hover{background:color-mix(in srgb,var(--accent) 88%,var(--ink))}.loc:not(.locked):not(.done):hover,.clue:hover,.opt:hover{border-color:var(--ink)}.tab[aria-selected="false"]:hover{color:var(--ink)}}
 .btn.wide{grid-column:1/-1}
 
-.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(420px,calc(100% - 32px));background:var(--ink);color:var(--ground);padding:10px 14px;border-radius:12px;font-size:14px;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.toast{pointer-events:none;position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(420px,calc(100% - 32px));background:var(--ink);color:var(--ground);padding:10px 14px;border-radius:12px;font-size:14px;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 
 /* 全頁畫面 */
 .overlay{position:fixed;inset:0;background:var(--ground);z-index:30;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) 16px max(24px,env(safe-area-inset-bottom,0px))}
@@ -130,6 +130,79 @@ h1{font-size:36px} h2{font-size:28px}
 .stat span{font-size:12px;color:var(--muted)}
 .grade{font-family:var(--mono);font-size:13px;letter-spacing:.08em;color:var(--string);font-weight:600}
 .note{font-size:12px;color:var(--muted);margin:0}
+
+/* 採訪場景：滿版背景，人物在左下，對話框在最底。圖檔在 assets/，沒有圖時顯示色塊佔位 */
+.topbar{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 12px}
+.topbar .btn{min-height:44px;padding:0 18px}
+#view-board{padding:0 16px 96px}
+.scene{position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;background:var(--ground)}
+.stage{position:absolute;inset:0}
+.stage-view{position:absolute;inset:0}
+.stage-view.from-r{animation:slide-r .28s ease-out}
+.stage-view.from-l{animation:slide-l .28s ease-out}
+@keyframes slide-r{from{transform:translateX(28px);opacity:.2}to{transform:none;opacity:1}}
+@keyframes slide-l{from{transform:translateX(-28px);opacity:.2}to{transform:none;opacity:1}}
+.stage-view img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bg-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;text-align:center;padding:68px 64px 0;background:linear-gradient(160deg,color-mix(in srgb,hsl(var(--h) 50% 55%) 38%,var(--surface)),color-mix(in srgb,hsl(var(--h) 45% 45%) 22%,var(--ground)))}
+.bg-ph span{font-family:var(--serif);font-weight:900;font-size:26px}
+.bg-ph small,.char-ph small{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* 人物：站在對話框上方的左下角 */
+.stage-area{position:relative;flex:1;min-height:0;pointer-events:none}
+.who-art{position:absolute;left:0;bottom:-12px;height:80%;aspect-ratio:3/4;max-width:60%;transition:opacity .2s}
+.who-art.dim{opacity:.55}
+.who-art.swap{animation:rise .25s ease-out}
+@keyframes rise{from{transform:translateY(12px);opacity:.3}to{transform:none;opacity:1}}
+.who-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:left bottom}
+.char-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding-bottom:22px}
+.char-ph svg{width:78%;flex:none;fill:color-mix(in srgb,hsl(var(--h) 45% 50%) 55%,var(--surface))}
+.char-ph small{text-align:center;background:color-mix(in srgb,var(--surface) 88%,transparent);border-radius:6px;padding:2px 8px}
+
+/* 左右箭頭、地點籤條 */
+.nav{position:absolute;top:42%;transform:translateY(-50%);z-index:3;width:50px;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;background:color-mix(in srgb,var(--surface) 86%,transparent);border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.nav.prev{left:8px} .nav.next{right:8px}
+.nav .arr{font-family:var(--mono);font-weight:600;font-size:22px;line-height:1}
+.nav .to{font-size:11px;font-weight:700;line-height:1.2}
+.nav:active{transform:translateY(-50%) scale(.96)}
+.places{position:absolute;top:8px;left:8px;right:8px;z-index:3;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.pchip{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:44px;padding:3px 2px;background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--line);border-radius:10px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer}
+.pchip b{font-family:var(--mono);font-size:12px;min-width:20px;border-radius:99px;padding:0 5px;color:var(--ink)}
+.pchip b.has{background:var(--marker);color:var(--marker-ink)}
+.pchip.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.pchip.on b{color:var(--ground)} .pchip.on b.has{color:var(--marker-ink)}
+.pchip:disabled{opacity:.5;cursor:default}
+
+/* 最底部：像視覺小說的對話框。半透明深色，浮在場景上，底部有一層漸層讓文字好讀 */
+.scene::after{content:"";position:absolute;left:0;right:0;bottom:0;height:62%;background:linear-gradient(transparent,rgba(8,12,22,.74));pointer-events:none;z-index:1}
+.panel{position:relative;z-index:2;flex:none;max-height:62dvh;display:flex;flex-direction:column;gap:10px;padding:0 12px calc(14px + env(safe-area-inset-bottom,0px));color:#F4F6FA}
+.panel .label{color:rgba(244,246,250,.85);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.panel .cards{display:flex;flex-direction:column;gap:8px;overflow-y:auto;overscroll-behavior:contain;max-height:34dvh}
+.panel .clue{color:var(--ink)}
+.box,.dialog,.panel .loc{background:rgba(12,18,30,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);box-shadow:0 6px 24px rgba(0,0,0,.35)}
+.box{display:flex;flex-direction:column;gap:8px;border-radius:16px;padding:12px 12px 10px}
+
+/* 對話框：名牌掛在左上角，台詞逐字出現，點一下先顯示完、再點才下一句 */
+.dialog{position:relative;display:flex;flex-direction:column;gap:6px;width:100%;min-height:116px;margin-top:14px;text-align:left;border-radius:16px;padding:20px 16px 10px;color:inherit;cursor:pointer}
+.dialog .speaker{position:absolute;top:-14px;left:14px;font-weight:700;font-size:14px;letter-spacing:.06em;color:#fff;background:hsl(var(--sh,215) 42% 36%);border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:2px 12px}
+.dialog.me .speaker{background:var(--marker);color:var(--marker-ink);border-color:transparent}
+.dialog .line{font-size:17px;line-height:1.7;min-height:3.4em}
+.dialog.narr .line{color:rgba(244,246,250,.82)}
+.dialog .more{margin-top:auto;align-self:flex-end;font-size:12px;color:var(--marker);animation:nudge 1s ease-in-out infinite}
+.dialog.typing .more{visibility:hidden}
+@keyframes nudge{50%{transform:translateY(3px)}}
+.scene-tools{display:flex;justify-content:space-between;align-items:center;min-height:36px;padding:0 4px;font-family:var(--mono);font-size:12px;color:rgba(244,246,250,.85);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.linkbtn{border:0;background:none;min-height:44px;padding:0 4px;font-size:14px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);cursor:pointer}
+
+/* 話題選單：像視覺小說的選項按鈕 */
+.panel .loc{border-radius:14px;padding:11px 14px;color:#F4F6FA}
+.panel .loc-place{color:rgba(244,246,250,.72)}
+.panel .cost{border-color:rgba(255,255,255,.85);color:#fff}
+.panel .loc.locked{border-style:dashed;background:rgba(12,18,30,.62)}
+.panel .loc.locked .loc-name{opacity:.7}
+.panel .loc.locked .cost{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.7);opacity:1}
+.panel .loc.done .loc-name{opacity:.8}
+.panel .loc.done .cost{border-color:transparent;color:var(--marker)}
+@media (hover:hover){.nav:hover{border-color:var(--ink)}.pchip:not(.on):not(:disabled):hover{border-color:var(--ink)}.panel .loc:not(.locked):hover{border-color:var(--marker);background:rgba(12,18,30,.88)}.dialog:hover{border-color:rgba(255,255,255,.45)}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}}
 </style>
 </head>
@@ -144,12 +217,22 @@ h1{font-size:36px} h2{font-size:28px}
 </header>
 
 <main class="app" inert>
-  <div class="tabs" role="tablist" aria-label="調查畫面">
-    <button class="tab" role="tab" id="tab-go" aria-selected="true" aria-controls="view-go">去採訪</button>
-    <button class="tab" role="tab" id="tab-board" aria-selected="false" aria-controls="view-board" tabindex="-1">線索板<span class="n" id="clue-n">1/12</span></button>
+  <div class="topbar">
+    <div class="tabs" role="tablist" aria-label="調查畫面">
+      <button class="tab" role="tab" id="tab-go" aria-selected="true" aria-controls="view-go">去採訪</button>
+      <button class="tab" role="tab" id="tab-board" aria-selected="false" aria-controls="view-board" tabindex="-1">線索板<span class="n" id="clue-n">1/12</span></button>
+    </div>
+    <button class="btn primary" id="submit" type="button">交稿</button>
   </div>
 
-  <section id="view-go" class="list" role="tabpanel" aria-labelledby="tab-go"></section>
+  <section id="view-go" class="scene" role="tabpanel" aria-labelledby="tab-go">
+    <div class="stage" id="stage" role="img"><div class="stage-view" id="stage-view"></div></div>
+    <div class="places" id="places" role="group" aria-label="地點"></div>
+    <button class="nav prev" id="nav-prev" type="button"></button>
+    <button class="nav next" id="nav-next" type="button"></button>
+    <div class="stage-area"><div class="who-art" id="who-art" hidden></div></div>
+    <div class="panel" id="panel"></div>
+  </section>
 
   <section id="view-board" role="tabpanel" aria-labelledby="tab-board" hidden>
     <div class="list">
@@ -161,9 +244,8 @@ h1{font-size:36px} h2{font-size:28px}
   </section>
 </main>
 
-<div class="dock" inert><div class="dock-in">
-  <button class="btn" id="connect" disabled>連起來</button>
-  <button class="btn primary" id="submit">交稿</button>
+<div class="dock" inert hidden><div class="dock-in">
+  <button class="btn wide" id="connect" disabled>連起來</button>
 </div></div>
 
 <div class="toast" id="toast" hidden></div>
@@ -176,10 +258,10 @@ h1{font-size:36px} h2{font-size:28px}
     <div class="editor">
       <span class="who">主編</span>
       <span>工廠移工阿迪失聯三天了，陳老闆已經通報。你有 48 小時，查出他為什麼離開。</span>
-      <span>每跑一個地方要花 6 小時。時間不夠全部跑完，想清楚再出發。</span>
+      <span>每問一件事要花 6 小時或 12 小時。時間不夠全部問完，想清楚再開口。</span>
     </div>
     <ol class="editor" style="padding-left:30px;margin:0">
-      <li>「去採訪」：花行動點蒐集線索。</li>
+      <li>「去採訪」：用左右箭頭或下方的籤條換地點，向在場的人問話，每問一件事花行動點。換地點不花時間。</li>
       <li>「線索板」：把兩條相關的線索連起來，形成推論。連錯不扣點，可以多試幾次。</li>
       <li>「交稿」：選一個報導方向，附上 2–3 條證據。</li>
     </ol>
@@ -210,17 +292,27 @@ const CLUES = {
   12:{title:'移工團體社工', src:'移工服務中心', kind:'text', body:'「失聯的人大多不是想做壞事，而是債務壓力、薪水太低、想換雇主換不了。」（官方數據待補）'}
 };
 
+/* 話題：在某個地點、向在場的人「問一件事」。cost 是行動點。 */
 const LOCS = [
-  {id:'factory', name:'去工廠找陳老闆', place:'五金工廠', cost:1, gives:[2]},
-  {id:'payslip', name:'跟老闆要薪資單', place:'工廠辦公室', cost:1, gives:[3], req:{clue:2, text:'需要先去工廠'}},
-  {id:'dorm',    name:'去宿舍看看', place:'工廠旁的移工宿舍', cost:1, gives:[4,5]},
-  {id:'debt',    name:'請室友給你看阿迪傳的截圖', place:'宿舍', cost:1, gives:[7], req:{clue:4, text:'需要先去宿舍'}},
-  {id:'family',  name:'問室友阿迪家裡的事', place:'宿舍', cost:1, gives:[8], req:{clue:4, text:'需要先去宿舍'}},
-  {id:'switch',  name:'問室友阿迪有沒有想換工作', place:'宿舍', cost:1, gives:[9], req:{clue:4, text:'需要先去宿舍'}},
-  {id:'agency',  name:'去仲介公司', place:'負責阿迪的仲介', cost:2, gives:[6]},
-  {id:'revisit', name:'再訪工廠，問換雇主的事', place:'五金工廠', cost:1, gives:[10], req:{ded:'D', text:'需要先推論出「他試過合法的路」'}},
-  {id:'social',  name:'搜尋同鄉社團', place:'社群平台', cost:1, gives:[11]},
-  {id:'ngo',     name:'拜訪移工團體', place:'移工服務中心', cost:2, gives:[12]}
+  {id:'factory', name:'問陳老闆：阿迪失聯前的狀況', cost:1, gives:[2]},
+  {id:'payslip', name:'請陳老闆給你看薪資單', cost:1, gives:[3], req:{clue:2, text:'需要先問過陳老闆'}},
+  {id:'revisit', name:'問陳老闆：換雇主的事', cost:1, gives:[10], req:{ded:'D', text:'需要先推論出「他試過合法的路」'}},
+  {id:'dorm',    name:'跟室友聊聊，看看阿迪的床位', cost:1, gives:[4,5]},
+  {id:'debt',    name:'請室友給你看阿迪傳的截圖', cost:1, gives:[7], req:{clue:4, text:'需要先跟室友聊聊'}},
+  {id:'family',  name:'問室友：阿迪家裡的事', cost:1, gives:[8], req:{clue:4, text:'需要先跟室友聊聊'}},
+  {id:'switch',  name:'問室友：阿迪有沒有想換工作', cost:1, gives:[9], req:{clue:4, text:'需要先跟室友聊聊'}},
+  {id:'agency',  name:'向仲介詢問阿迪的合約', cost:2, gives:[6]},
+  {id:'social',  name:'搜尋同鄉社團', cost:1, gives:[11]},
+  {id:'ngo',     name:'請教社工：失聯的原因', cost:2, gives:[12]}
+];
+
+/* 地點：左右切換。順序就是箭頭的順序。npc 是這裡的人物（沒有就不放）。 */
+const PLACES = [
+  {id:'factory', name:'五金工廠',     short:'工廠', bg:'factory', hue:30,  npc:'boss',     topics:['factory','payslip','revisit']},
+  {id:'dorm',    name:'移工宿舍',     short:'宿舍', bg:'dorm',    hue:150, npc:'roommate', topics:['dorm','debt','family','switch']},
+  {id:'agency',  name:'仲介公司',     short:'仲介', bg:'agency',  hue:260, npc:'agency',   topics:['agency']},
+  {id:'social',  name:'同鄉社團',     short:'社團', bg:'social',  hue:330, npc:null,       topics:['social']},
+  {id:'ngo',     name:'移工服務中心', short:'服務中心', bg:'ngo', hue:140, npc:'ngo',      topics:['ngo']}
 ];
 
 const DEDS = [
@@ -251,10 +343,74 @@ const ENDINGS = {
 };
 const ENDING_KEYS = Object.keys(ENDINGS);
 
+/* ====== 採訪對話：人物與台詞（草稿，待新聞部審），key 對應 LOCS 的話題 id ======
+   c：說話的人（CHARS 的 key；'me' 是玩家；不填 = 旁白）　m：表情　t：台詞
+   線索卡上的原話（引號內）維持原文，對話只是把它放進情境裡。
+   圖檔放 assets/：背景 bg-<地點 bg>、人物 char-<人物>-<表情>，副檔名 webp／png／jpg 皆可 */
+const CHARS = {
+  boss:    {name:'陳老闆', hue:30,  moods:{calm:'平靜', uneasy:'為難', tense:'激動'}},
+  roommate:{name:'室友',   hue:200, moods:{calm:'平靜', uneasy:'不安', sad:'難過'}},
+  agency:  {name:'仲介',   hue:260, moods:{calm:'平靜', uneasy:'不安'}},
+  ngo:     {name:'社工',   hue:140, moods:{calm:'平靜', serious:'嚴肅'}}
+};
+const DIALOGUES = {
+  factory:{lines:[
+    {t:'五金工廠。幾台機器停著，沒有人在趕工。'},
+    {c:'boss', m:'calm', t:'你是報社的？阿迪的事，我已經依規定通報了。'},
+    {c:'me', t:'他失聯前，有什麼不一樣的地方嗎？'},
+    {c:'boss', m:'uneasy', t:'「這三個月訂單掉了快一半，全廠都減班，沒加班可以給。他平常很乖，我也想不通。」'}
+  ]},
+  payslip:{lines:[
+    {t:'陳老闆從辦公室的抽屜裡翻出一疊文件。'},
+    {c:'me', t:'方便讓我看一下阿迪的薪資單嗎？'},
+    {c:'boss', m:'calm', t:'上個月的，你看就好。'},
+    {c:'boss', m:'uneasy', t:'加班是零。不是我少算，是真的沒有。'}
+  ]},
+  dorm:{lines:[
+    {t:'工廠旁的宿舍。房間很安靜，只剩一個室友在。'},
+    {c:'roommate', m:'calm', t:'你是來找阿迪的嗎？我跟他睡上下舖。'},
+    {c:'roommate', m:'uneasy', t:'他最近常常在手機上打字。你自己看吧，他傳給我的我都留著。'},
+    {t:'阿迪的床鋪收得很乾淨。行李箱和冬天的外套都不見了，不像臨時離開。'}
+  ]},
+  debt:{lines:[
+    {c:'me', t:'他有跟你提過還款的事嗎？可以讓我看看他傳給你的截圖嗎？'},
+    {c:'roommate', m:'sad', t:'他給我看過一次，後來就不太說了。'},
+    {c:'roommate', m:'sad', t:'你看，這是他收到的訊息。'}
+  ]},
+  family:{lines:[
+    {c:'me', t:'他家裡的事，你知道多少？'},
+    {c:'roommate', m:'sad', t:'他媽媽傳訊息給他，說爸爸住院了。後來他們講了什麼，我是聽他說的。'}
+  ]},
+  switch:{lines:[
+    {c:'me', t:'他有沒有說過想換工作？'},
+    {c:'roommate', m:'calm', t:'「他上個月打過 1955 問怎麼換雇主。他說老闆不同意的話很難換。」'}
+  ]},
+  agency:{lines:[
+    {t:'負責阿迪的仲介公司。櫃檯的人把一份合約推到你面前。'},
+    {c:'agency', m:'calm', t:'費用都寫在合約上，簽的時候他也都看過。我們這邊只經手文件。'},
+    {c:'me', t:'這筆錢，他是怎麼付的？'},
+    {c:'agency', m:'uneasy', t:'他來台灣之前，在母國跟貸款公司借的，分 24 期，每個月從薪水寄回去還。'}
+  ]},
+  revisit:{lines:[
+    {c:'me', t:'阿迪想換雇主的事，你知道嗎？'},
+    {c:'boss', m:'tense', t:'「我花錢、跑一堆流程申請他來，現在訂單少他就要走？之後訂單回來我怎麼辦？」'},
+    {c:'boss', m:'uneasy', t:'我不是要為難他。我自己也在撐。'}
+  ]},
+  social:{lines:[
+    {t:'你打開阿迪常看的同鄉社團，往下滑了很久，停在一則徵人貼文。'},
+    {t:'「急徵臨時工，日領現金，包吃住，不問證件。」貼文底下有阿迪按的讚。'}
+  ]},
+  ngo:{lines:[
+    {t:'移工服務中心。社工倒了一杯茶給你，請你坐下。'},
+    {c:'ngo', m:'calm', t:'「失聯的人大多不是想做壞事，而是債務壓力、薪水太低、想換雇主換不了。」'},
+    {c:'ngo', m:'serious', t:'我們不能替他說話。但如果他願意聯絡，我們可以幫忙轉達。'}
+  ]}
+};
+
 /* ====== 狀態 ====== */
 const $ = s => document.querySelector(s);
 let S;
-function reset(){ S = {points:START_POINTS, clues:new Set([1]), deds:new Set(), done:new Set(), sel:[], fresh:new Set()}; }
+function reset(){ S = {points:START_POINTS, clues:new Set([1]), deds:new Set(), done:new Set(), sel:[], fresh:new Set(), place:0, talk:null, shown:-1, who:null}; }
 
 function toast(msg){
   const t = $('#toast'); t.textContent = msg; t.hidden = false;
@@ -273,16 +429,6 @@ function locState(l){
   if (S.done.has(l.id)) return 'done';
   if (l.req && ((l.req.clue && !S.clues.has(l.req.clue)) || (l.req.ded && !S.deds.has(l.req.ded)))) return 'locked';
   return 'open';
-}
-
-function renderGo(){
-  $('#view-go').innerHTML = LOCS.map(l => {
-    const st = locState(l);
-    const place = st === 'locked' ? l.req.text : st === 'done' ? '已採訪' : l.place;
-    const cost = st === 'done' ? '✓' : l.cost + ' 點';
-    return `<button class="loc ${st === 'open' ? '' : st}" data-loc="${l.id}" ${st === 'open' ? '' : 'aria-disabled="true"'}>
-      <span class="loc-name">${l.name}</span><span class="loc-place">${place}</span><span class="cost">${cost}</span></button>`;
-  }).join('');
 }
 
 function clueBody(c){
@@ -308,18 +454,170 @@ function showTab(which){
   for (const k of ['go','board']){ const t = $('#tab-' + k); t.setAttribute('aria-selected', which === k); t.tabIndex = which === k ? 0 : -1; }
   $('#view-go').hidden = which !== 'go';
   $('#view-board').hidden = which !== 'board';
+  $('.dock').hidden = which !== 'board'; // 連起來只在線索板上用
   window.scrollTo(0,0);
 }
 
-function visit(id){
-  const l = LOCS.find(x => x.id === id); const st = locState(l);
+/* ====== 採訪：舞台（背景 + 人物）、話題選單、對話 ======
+   全部由 S.place（在哪個地點）和 S.talk（正在進行的對話）決定畫面，
+   所以切到線索板再回來，對話會停在原處。 */
+const ART_EXT = ['webp','png','jpg'];
+function loadArt(img, name, ph){ // 依序試 webp → png → jpg；載入成功就收起佔位，全都沒有就留著佔位
+  let i = 0;
+  img.onload = () => { if (ph) ph.hidden = true; };
+  img.onerror = () => { if (++i < ART_EXT.length) img.src = 'assets/' + name + '.' + ART_EXT[i]; else img.remove(); };
+  img.src = 'assets/' + name + '.' + ART_EXT[0];
+}
+const focusIn = sel => { const e = $(sel); if (e) e.focus({preventScroll:true}); };
+
+function buildStage(p){
+  const dir = S.shown < 0 ? '' : S.place > S.shown ? 'from-r' : 'from-l';
+  S.shown = S.place; S.who = null;
+  $('#stage').style.setProperty('--h', p.hue);
+  $('#stage').setAttribute('aria-label', p.name);
+  const view = $('#stage-view');
+  view.className = 'stage-view';
+  view.innerHTML = `<div class="bg-ph"><span>${p.name}</span><small>場景圖待補　assets/bg-${p.bg}.webp</small></div><img class="bg" alt="">`;
+  $('#who-art').innerHTML = ''; $('#who-art').hidden = true;
+  const bg = view.querySelector('img.bg');
+  bg.style.objectPosition = p.pos || '50% 50%'; // 圖不是 9:16 時，用 pos 決定手機上要看圖的哪一塊
+  loadArt(bg, 'bg-' + p.bg, view.querySelector('.bg-ph'));
+  if (dir){ void view.offsetWidth; view.classList.add(dir); }
+}
+
+function whoNow(p){ // 舞台上該站的人：對話中是最近一個開口的人物，否則是這個地點的常駐人物
+  if (S.talk){
+    const lines = DIALOGUES[S.talk.id].lines;
+    for (let i = S.talk.i; i >= 0; i--) if (CHARS[lines[i].c]) return {key:lines[i].c, mood:lines[i].m};
+  }
+  return p.npc ? {key:p.npc, mood:'calm'} : null;
+}
+
+function renderWho(p){
+  const box = $('#who-art'), w = whoNow(p);
+  if (!w){ box.hidden = true; S.who = null; return; }
+  const m = CHARS[w.key].moods[w.mood] ? w.mood : 'calm';
+  const T = S.talk;
+  box.classList.toggle('dim', !!T && !T.result && DIALOGUES[T.id].lines[T.i].c === 'me'); // 玩家發言時，人物淡一點
+  if (S.who === w.key + ':' + m){ box.hidden = false; return; }
+  S.who = w.key + ':' + m;
+  const ch = CHARS[w.key];
+  box.innerHTML = `<div class="char-ph" style="--h:${ch.hue}"><svg viewBox="0 0 120 160" aria-hidden="true"><circle cx="60" cy="54" r="26"/><path d="M12 160c0-34 20-58 48-58s48 24 48 58z"/></svg><small>${ch.name}・${ch.moods[m]}　assets/char-${w.key}-${m}.webp</small></div><img alt="">`;
+  loadArt(box.querySelector('img'), 'char-' + w.key + '-' + m, box.querySelector('.char-ph'));
+  box.hidden = false;
+  box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap');
+}
+
+const topicOf = id => LOCS.find(l => l.id === id);
+const openCount = p => p.topics.filter(id => locState(topicOf(id)) === 'open').length;
+const allDone = p => p.topics.every(id => S.done.has(id));
+
+function setNav(btn, to, glyph, hide){
+  btn.hidden = !to || hide; // 沒有下一個地點、或對話中，就收起箭頭
+  if (!to) return;
+  btn.setAttribute('aria-label', '前往' + to.name);
+  btn.innerHTML = `<span class="arr" aria-hidden="true">${glyph}</span><span class="to">${to.short}</span>`;
+}
+
+function clueCard(id){
+  const c = CLUES[id];
+  return `<div class="clue" style="cursor:default"><div class="clue-head"><span class="clue-no">#${id}</span><span class="clue-title">${c.title}</span><span class="clue-src">${c.src}</span></div>${clueBody(c)}</div>`;
+}
+
+function renderPanel(p){
+  const el = $('#panel'), T = S.talk;
+  clearInterval(typeTimer); typeTimer = 0;
+  if (!T){
+    el.innerHTML = `<div class="label">${p.npc ? '在這裡可以問' : '在這裡可以做'}</div>` + p.topics.map(id => {
+      const l = topicOf(id), st = locState(l);
+      const sub = st === 'locked' ? l.req.text : st === 'done' ? '已問過，點一下可以重看' : '';
+      return `<button class="loc ${st === 'open' ? '' : st}" data-topic="${l.id}" type="button" ${st === 'locked' ? 'aria-disabled="true"' : ''}>
+        <span class="loc-name">${l.name}</span>${sub ? `<span class="loc-place">${sub}</span>` : ''}<span class="cost">${st === 'done' ? '✓' : l.cost + ' 點'}</span></button>`;
+    }).join('');
+    return;
+  }
+  const lines = DIALOGUES[T.id].lines;
+  if (T.result){
+    const gives = topicOf(T.id).gives;
+    el.innerHTML = `<div class="box"><div class="label">${T.replay ? '這次問到的線索' : '拿到新線索'}</div><div class="cards">${gives.map(clueCard).join('')}</div></div>
+      <button class="btn primary" data-act="close" type="button">${T.replay ? '關閉' : '收進線索板'}</button>`;
+    return;
+  }
+  const ln = lines[T.i], last = T.i === lines.length - 1;
+  const speaker = ln.c === 'me' ? '你' : CHARS[ln.c] ? CHARS[ln.c].name : '';
+  el.innerHTML = `
+    <button class="dialog ${ln.c === 'me' ? 'me' : ln.c ? '' : 'narr'}" data-act="next" type="button" style="--sh:${CHARS[ln.c] ? CHARS[ln.c].hue : 215}" aria-label="${speaker ? speaker + '：' : ''}${ln.t}">
+      ${speaker ? `<span class="speaker">${speaker}</span>` : ''}<span class="line">${ln.t}</span>
+      <span class="more">${last ? (T.replay ? '結束' : '看結果') : '下一句'} ▶</span>
+    </button>
+    <div class="scene-tools"><span>${T.i + 1} / ${lines.length}</span>${last ? '' : '<button class="linkbtn" data-act="skip" type="button">跳到最後</button>'}</div>`;
+  typeLine();
+}
+
+/* 台詞逐字出現；點一下先顯示完整句，再點才換下一句。偏好減少動態時直接顯示 */
+let typeTimer = 0;
+function showFull(){
+  clearInterval(typeTimer); typeTimer = 0;
+  const T = S.talk, el = $('#panel .line'); if (!T || T.result || !el) return;
+  el.textContent = DIALOGUES[T.id].lines[T.i].t; T.doneI = T.i;
+  const box = $('#panel .dialog'); if (box) box.classList.remove('typing');
+}
+function typeLine(){
+  clearInterval(typeTimer); typeTimer = 0;
+  const T = S.talk; if (!T || T.result || !$('#panel .line')) return;
+  const full = DIALOGUES[T.id].lines[T.i].t;
+  if (T.doneI === T.i || matchMedia('(prefers-reduced-motion: reduce)').matches){ showFull(); return; }
+  const el = $('#panel .line'), box = $('#panel .dialog'); let n = 0;
+  el.textContent = ''; box.classList.add('typing');
+  typeTimer = setInterval(() => { n++; el.textContent = full.slice(0, n); if (n >= full.length) showFull(); }, 24);
+}
+
+function renderGo(){
+  const p = PLACES[S.place], talking = !!S.talk;
+  if (S.shown !== S.place) buildStage(p);
+  setNav($('#nav-prev'), PLACES[S.place - 1], '‹', talking);
+  setNav($('#nav-next'), PLACES[S.place + 1], '›', talking);
+  $('#places').innerHTML = PLACES.map((q, i) => {
+    const n = openCount(q);
+    const label = n ? '還有 ' + n + ' 件事可問' : allDone(q) ? '都問完了' : '還沒有可問的事';
+    return `<button class="pchip ${i === S.place ? 'on' : ''}" data-place="${i}" type="button" ${talking ? 'disabled' : ''} aria-label="${q.name}，${label}" ${i === S.place ? 'aria-current="true"' : ''}>${q.short}<b class="${n ? 'has' : ''}">${n || (allDone(q) ? '✓' : '·')}</b></button>`;
+  }).join('');
+  renderWho(p);
+  renderPanel(p);
+}
+
+function go(to){ // 換地點不花行動點
+  if (S.talk || to < 0 || to >= PLACES.length || to === S.place) return;
+  S.place = to; renderGo();
+  const a = document.activeElement;
+  if (!a || a === document.body || a.hidden || a.closest('#places')) focusIn('.pchip.on');
+}
+
+function startTopic(id){
+  const l = topicOf(id), st = locState(l);
   if (st === 'locked'){ toast(l.req.text); return; }
-  if (st === 'done') return;
-  if (S.points < l.cost){ toast('時間不夠了，只剩 ' + S.points * HOURS_PER_POINT + ' 小時。可以去線索板推論，或直接交稿。'); return; }
-  S.points -= l.cost; S.done.add(id);
-  l.gives.forEach(c => { S.clues.add(c); S.fresh.add(c); });
-  renderAll();
-  toast('拿到新線索：' + l.gives.map(c => CLUES[c].title).join('、'));
+  if (st === 'open'){
+    if (S.points < l.cost){ toast('時間不夠了，只剩 ' + S.points * HOURS_PER_POINT + ' 小時。可以去線索板推論，或直接交稿。'); return; }
+    S.points -= l.cost; S.done.add(id);
+    l.gives.forEach(c => { S.clues.add(c); S.fresh.add(c); });
+  }
+  S.talk = {id, i:0, replay: st === 'done', result:false}; // 重看已問過的話題，不花點數
+  renderAll(); window.scrollTo(0,0); focusIn('[data-act=next]');
+}
+
+function talkAct(act){
+  const T = S.talk, last = DIALOGUES[T.id].lines.length - 1;
+  if (act === 'next' && typeTimer){ showFull(); return; } // 還在逐字出現：先顯示完整句
+  if (act === 'skip'){ T.i = last; T.doneI = last; }
+  else if (act === 'next'){
+    if (T.i < last) T.i++;
+    else {
+      T.result = true;
+      if (!T.replay){ const titles = topicOf(T.id).gives.map(c => CLUES[c].title).join('、'); $('#sr').textContent = ''; setTimeout(() => { $('#sr').textContent = '拿到新線索：' + titles; }, 30); }
+    }
+  } else if (act === 'close'){ S.talk = null; renderGo(); window.scrollTo(0,0); focusIn('.loc'); return; }
+  renderGo();
+  focusIn(T.result ? '[data-act=close]' : '[data-act=next]');
 }
 
 function toggleClue(id){
@@ -405,7 +703,27 @@ function begin(){
   $('#intro').hidden = true; $('#end').hidden = true; $('#submit-view').hidden = true;
 }
 
-$('#view-go').addEventListener('click', e => { const b = e.target.closest('[data-loc]'); if (b) visit(b.dataset.loc); });
+$('#panel').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.topic) startTopic(b.dataset.topic); else if (b.dataset.act) talkAct(b.dataset.act);
+});
+$('#nav-prev').addEventListener('click', () => go(S.place - 1));
+$('#nav-next').addEventListener('click', () => go(S.place + 1));
+$('#places').addEventListener('click', e => { const b = e.target.closest('[data-place]'); if (b && !b.disabled) go(+b.dataset.place); });
+// 鍵盤左右鍵、舞台上的左右滑動（避開螢幕邊緣，免得跟瀏覽器的「返回」手勢打架）
+document.addEventListener('keydown', e => {
+  if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.target.closest('.tabs, input')) return;
+  if (!S || S.talk || $('#view-go').hidden || document.querySelector('.overlay:not([hidden])')) return;
+  go(S.place + (e.key === 'ArrowLeft' ? -1 : 1));
+});
+let swipe = null;
+$('#view-go').addEventListener('touchstart', e => { if (e.target.closest('#panel')) return; const t = e.touches[0]; swipe = {x:t.clientX, y:t.clientY}; }, {passive:true});
+$('#view-go').addEventListener('touchend', e => {
+  if (!swipe) return;
+  const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y, x0 = swipe.x; swipe = null;
+  if (Math.abs(dx) < 50 || Math.abs(dy) > 40 || x0 < 24 || x0 > innerWidth - 24) return;
+  go(S.place + (dx < 0 ? 1 : -1));
+}, {passive:true});
 $('#clues').addEventListener('click', e => { const b = e.target.closest('[data-clue]'); if (b) toggleClue(+b.dataset.clue); });
 function lockBg(on){ document.querySelectorAll('.deadline,.app,.dock').forEach(e => { e.inert = on; }); }
 $('#tab-go').addEventListener('click', () => showTab('go'));
