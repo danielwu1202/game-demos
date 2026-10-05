@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<title>阿迪為什麼失聯了</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+:root{
+  --ground:#ECEEF1; --surface:#FFFFFF; --ink:#16202E; --muted:#5E6878; --line:#D5DAE1;
+  --marker:#F5D04C; --marker-ink:#16202E; --string:#C6413A; --accent:#25467A; --accent-ink:#FFFFFF;
+  --bubble:#E3E8EF; --bubble-me:#D6E6FA;
+  --bar:var(--ink); --bar-ink:var(--ground);
+  color-scheme:light;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#12161D; --surface:#1B212B; --ink:#E8ECF2; --muted:#98A2B3; --line:#2C3440;
+    --marker:#E9C33E; --marker-ink:#16202E; --string:#E26A60; --accent:#7FA6E8; --accent-ink:#0E1522;
+    --bubble:#252D39; --bubble-me:#23344D;
+    --bar:var(--surface); --bar-ink:var(--ink);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#12161D; --surface:#1B212B; --ink:#E8ECF2; --muted:#98A2B3; --line:#2C3440;
+  --marker:#E9C33E; --marker-ink:#16202E; --string:#E26A60; --accent:#7FA6E8; --accent-ink:#0E1522;
+  --bubble:#252D39; --bubble-me:#23344D;
+  --bar:var(--surface); --bar-ink:var(--ink);
+}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;-webkit-text-size-adjust:100%;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{max-width:460px;margin:0 auto;padding-block:12px 96px;display:flex;flex-direction:column;gap:14px}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+::selection{background:var(--marker);color:var(--marker-ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* 截稿倒數 */
+.deadline{position:sticky;top:0;z-index:5;background:var(--bar);color:var(--bar-ink);border-bottom:1px solid var(--line);border-radius:0 0 14px 14px;margin-inline:-16px;padding:max(10px,env(safe-area-inset-top,0px)) 16px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.deadline .case{font-family:var(--serif);font-weight:900;font-size:17px}
+.clockbox{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.hours{font-family:var(--mono);font-weight:600;font-size:20px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.dots{display:flex;gap:4px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--marker)}
+.dot.used{background:transparent;border:1.5px solid color-mix(in srgb,var(--bar-ink) 40%,transparent)}
+
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.tab{border:0;background:none;border-radius:9px;padding:9px;min-height:44px;font-weight:700;cursor:pointer;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--ground)}
+.tab .n{font-family:var(--mono);font-size:12px;margin-left:4px}
+
+.label{font-size:12px;letter-spacing:.1em;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:8px}
+
+/* 採訪地點 */
+.loc{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.loc-name{font-weight:700}
+.loc-place{font-size:12px;color:var(--muted);grid-column:1}
+.cost{grid-row:1/3;grid-column:2;font-family:var(--mono);font-weight:600;font-size:13px;border:1.5px solid var(--ink);border-radius:99px;padding:2px 10px;white-space:nowrap}
+.loc.locked{cursor:default;border-style:dashed}
+.loc.locked .loc-name,.loc.locked .cost{opacity:.6}
+.loc.locked .cost{border-color:var(--muted);color:var(--muted)}
+.loc.done{cursor:default}
+.loc.done .loc-name{opacity:.6}
+.loc.done .cost{border-color:transparent;color:var(--muted)}
+
+/* 線索卡 */
+.clue{display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;position:relative}
+.clue-head{display:flex;gap:10px;align-items:baseline}
+.clue-no{font-family:var(--mono);font-weight:600;font-size:12px;color:var(--muted)}
+.clue-title{font-weight:700}
+.clue-src{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.clue p{margin:0;font-size:14px}
+.clue.sel{border-color:var(--marker);box-shadow:0 0 0 2px var(--marker)}
+.clue.sel .clue-title{background:var(--marker);color:var(--marker-ink);padding:0 4px;border-radius:3px}
+.clue.new{animation:flash 1s}
+@keyframes flash{0%{background:var(--marker)}100%{background:var(--surface)}}
+.doc{font-family:var(--mono);font-size:13px;background:var(--ground);border-radius:8px;padding:8px 10px;display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-variant-numeric:tabular-nums}
+.doc .total{border-top:1px solid var(--line);padding-top:4px;font-weight:600}
+.chat{display:flex;flex-direction:column;gap:5px}
+.msg{max-width:82%;padding:6px 10px;border-radius:14px;font-size:14px;background:var(--bubble);align-self:flex-start}
+.msg.me{align-self:flex-end;background:var(--bubble-me)}
+.msg .who{display:block;font-size:11px;color:var(--muted)}
+
+/* 推論 */
+.deds{display:flex;flex-direction:column;gap:6px}
+.ded{border:1px solid color-mix(in srgb,var(--string) 35%,var(--line));background:color-mix(in srgb,var(--string) 6%,var(--surface));border-radius:10px;padding:8px 12px;font-size:14px}
+.ded b{color:var(--string)}
+.ded small{display:block;color:var(--muted);font-family:var(--mono);font-size:11px}
+.empty{font-size:14px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:12px;padding:14px}
+
+/* 底部按鈕 */
+.dock{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--ground) 30%);z-index:6}
+.dock-in{max-width:460px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:1.5px solid var(--ink);background:var(--surface);border-radius:12px;padding:12px;font-weight:700;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:not(:disabled):active{transform:scale(.98)}
+@media (hover:hover){.btn:not(:disabled):hover{background:color-mix(in srgb,var(--ink) 6%,var(--surface))}.btn.primary:not(:disabled):hover{background:color-mix(in srgb,var(--accent) 88%,var(--ink))}.loc:not(.locked):not(.done):hover,.clue:hover,.opt:hover{border-color:var(--ink)}.tab[aria-selected="false"]:hover{color:var(--ink)}}
+.btn.wide{grid-column:1/-1}
+
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(420px,calc(100% - 32px));background:var(--ink);color:var(--ground);padding:10px 14px;border-radius:12px;font-size:14px;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+
+/* 全頁畫面 */
+.overlay{position:fixed;inset:0;background:var(--ground);z-index:30;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) 16px max(24px,env(safe-area-inset-bottom,0px))}
+.sheet{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--serif);font-weight:900;margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:36px} h2{font-size:28px}
+.lead{margin:0;font-size:16px}
+.editor{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.editor .who{font-size:12px;color:var(--muted)}
+.opt{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.opt:has(input:disabled){opacity:.5;cursor:default}
+.opt:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column}
+.stat b{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.grade{font-family:var(--mono);font-size:13px;letter-spacing:.08em;color:var(--string);font-weight:600}
+.note{font-size:12px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="deadline" inert>
+  <div class="case">阿迪失聯案</div>
+  <div class="clockbox">
+    <div class="hours" id="hours">距截稿 48:00</div>
+    <div class="dots" id="dots" aria-label="剩餘行動點"></div>
+  </div>
+</header>
+
+<main class="app" inert>
+  <div class="tabs" role="tablist" aria-label="調查畫面">
+    <button class="tab" role="tab" id="tab-go" aria-selected="true" aria-controls="view-go">去採訪</button>
+    <button class="tab" role="tab" id="tab-board" aria-selected="false" aria-controls="view-board" tabindex="-1">線索板<span class="n" id="clue-n">1/12</span></button>
+  </div>
+
+  <section id="view-go" class="list" role="tabpanel" aria-labelledby="tab-go"></section>
+
+  <section id="view-board" role="tabpanel" aria-labelledby="tab-board" hidden>
+    <div class="list">
+      <div class="label">推論</div>
+      <div class="deds" id="deds"></div>
+      <div class="label">線索（點兩張，再按「連起來」）</div>
+      <div class="list" id="clues"></div>
+    </div>
+  </section>
+</main>
+
+<div class="dock" inert><div class="dock-in">
+  <button class="btn" id="connect" disabled>連起來</button>
+  <button class="btn primary" id="submit">交稿</button>
+</div></div>
+
+<div class="toast" id="toast" hidden></div>
+<div class="sr" id="sr" role="status" aria-live="polite"></div>
+
+<div class="overlay" id="intro">
+  <div class="sheet">
+    <div class="label">第二款試玩版 · 推理調查</div>
+    <h1>阿迪為什麼失聯了</h1>
+    <div class="editor">
+      <span class="who">主編</span>
+      <span>工廠移工阿迪失聯三天了，陳老闆已經通報。你有 48 小時，查出他為什麼離開。</span>
+      <span>每跑一個地方要花 6 小時。時間不夠全部跑完，想清楚再出發。</span>
+    </div>
+    <ol class="editor" style="padding-left:30px;margin:0">
+      <li>「去採訪」：花行動點蒐集線索。</li>
+      <li>「線索板」：把兩條相關的線索連起來，形成推論。連錯不扣點，可以多試幾次。</li>
+      <li>「交稿」：選一個報導方向，附上 2–3 條證據。</li>
+    </ol>
+    <button class="btn primary" id="begin">開始調查</button>
+    <p class="note">內部試玩用 demo。人物與情節為虛構，薪資等數字為示意，待新聞部查核。</p>
+  </div>
+</div>
+
+<div class="overlay" id="submit-view" hidden><div class="sheet" id="submit-sheet"></div></div>
+<div class="overlay" id="end" hidden><div class="sheet" id="end-sheet"></div></div>
+
+<script>
+/* ====== 內容：線索、地點、推論、結局 ====== */
+const START_POINTS = 8, HOURS_PER_POINT = 6;
+
+const CLUES = {
+  1:{title:'失聯通報', src:'開場', kind:'text', body:'移工阿迪（29 歲）自 9/20 起未到班，宿舍找不到人。雇主已依規定通報。'},
+  2:{title:'陳老闆訪談', src:'工廠', kind:'text', body:'「這三個月訂單掉了快一半，全廠都減班，沒加班可以給。他平常很乖，我也想不通。」'},
+  3:{title:'薪資單', src:'工廠', kind:'doc', rows:[['本薪','29,500'],['加班（0 小時）','0'],['膳宿費','−5,000'],['勞健保','−1,200'],['實領','23,300']]},
+  4:{title:'室友的聊天紀錄', src:'宿舍', kind:'chat', msgs:[['阿迪','這個月又沒有加班'],['阿迪','這樣根本存不到錢'],['室友',1,'大家都一樣啊'],['阿迪','我不一樣，我還有貸款']]},
+  5:{title:'空床位', src:'宿舍', kind:'text', body:'床鋪收得很乾淨，行李箱和冬天的外套都帶走了。不像臨時離開。'},
+  6:{title:'仲介合約', src:'仲介公司', kind:'text', body:'來台前在母國向貸款公司借錢支付仲介相關費用，分 24 期償還，每月從薪水寄回去還。'},
+  7:{title:'貸款催繳訊息', src:'室友轉傳的截圖', kind:'chat', msgs:[['貸款公司','您本月款項已逾期 15 天，請盡速繳納'],['貸款公司','逾期將通知您的保證人（家屬）']]},
+  8:{title:'阿迪和媽媽的對話', src:'室友轉述', kind:'chat', msgs:[['媽媽','爸爸住院了'],['媽媽','這個月可以多寄一點嗎？'],['阿迪',1,'我想辦法']]},
+  9:{title:'打過 1955', src:'室友', kind:'text', body:'「他上個月打過 1955 問怎麼換雇主。他說老闆不同意的話很難換。」'},
+  10:{title:'老闆對換雇主的說法', src:'再訪工廠', kind:'text', body:'「我花錢、跑一堆流程申請他來，現在訂單少他就要走？之後訂單回來我怎麼辦？」'},
+  11:{title:'同鄉社團的徵人貼文', src:'社群平台', kind:'text', body:'「急徵臨時工，日領現金，包吃住，不問證件。」貼文底下有阿迪按的讚。'},
+  12:{title:'移工團體社工', src:'移工服務中心', kind:'text', body:'「失聯的人大多不是想做壞事，而是債務壓力、薪水太低、想換雇主換不了。」（官方數據待補）'}
+};
+
+const LOCS = [
+  {id:'factory', name:'去工廠找陳老闆', place:'五金工廠', cost:1, gives:[2]},
+  {id:'payslip', name:'跟老闆要薪資單', place:'工廠辦公室', cost:1, gives:[3], req:{clue:2, text:'需要先去工廠'}},
+  {id:'dorm',    name:'去宿舍看看', place:'工廠旁的移工宿舍', cost:1, gives:[4,5]},
+  {id:'debt',    name:'請室友給你看阿迪傳的截圖', place:'宿舍', cost:1, gives:[7], req:{clue:4, text:'需要先去宿舍'}},
+  {id:'family',  name:'問室友阿迪家裡的事', place:'宿舍', cost:1, gives:[8], req:{clue:4, text:'需要先去宿舍'}},
+  {id:'switch',  name:'問室友阿迪有沒有想換工作', place:'宿舍', cost:1, gives:[9], req:{clue:4, text:'需要先去宿舍'}},
+  {id:'agency',  name:'去仲介公司', place:'負責阿迪的仲介', cost:2, gives:[6]},
+  {id:'revisit', name:'再訪工廠，問換雇主的事', place:'五金工廠', cost:1, gives:[10], req:{ded:'D', text:'需要先推論出「他試過合法的路」'}},
+  {id:'social',  name:'搜尋同鄉社團', place:'社群平台', cost:1, gives:[11]},
+  {id:'ngo',     name:'拜訪移工團體', place:'移工服務中心', cost:2, gives:[12]}
+];
+
+const DEDS = [
+  {id:'A', pair:[3,7], title:'阿迪每月入不敷出', text:'實領薪水扣掉要還的貸款，所剩無幾。'},
+  {id:'B', pair:[6,7], title:'債務來自仲介費', text:'他還沒開始工作就先背了債。'},
+  {id:'C', pair:[2,3], title:'減班讓收入更少', text:'不是老闆刻意扣錢，是沒有加班可以做。'},
+  {id:'D', pair:[4,9], title:'他試過合法的路', text:'他想換工作，也打過 1955。可以再去問問老闆。'},
+  {id:'E', pair:[5,11], title:'他可能去了哪裡', text:'有計畫地離開，很可能去做日領的臨時工。'}
+];
+
+const DIRS = [
+  {id:'d1', text:'他想賺更多，就跑去打黑工', support:[4,5,11], need:2},
+  {id:'d2', text:'雇主苛刻，他逃離壓榨', support:[2,3,10], need:2},
+  {id:'d3', text:'家裡出事，急需用錢', support:[7,8], need:2},
+  {id:'d4', text:'債務、減班、換不了雇主，三件事疊在一起', support:[2,3,6,7,9,10], need:3, needDeds:3}
+];
+
+const ENDINGS = {
+  d1s:{grade:'部分真相', title:'沒錯，但你只寫了一半', edit:'他確實去做了臨時工。可是他為什麼要走？讀者看完只會記得「又一個逃跑的移工」。'},
+  d1w:{grade:'刻板印象', title:'稿子發出去，被批評標籤化', edit:'你的證據撐不起這個結論，只是寫了大家以為的樣子。'},
+  d2s:{grade:'部分真相', title:'老闆也有他的難處', edit:'減班、不同意轉換都是事實。但陳老闆不是壞人，訂單掉了他也在撐。'},
+  d2w:{grade:'報導失實', title:'陳老闆投訴報導不實', edit:'你說他苛刻，卻拿不出證據。這篇要撤下來。'},
+  d3s:{grade:'部分真相', title:'家裡出事是最後一根稻草', edit:'他真的很需要錢。但為什麼多寄一點錢，就逼得他得離開？'},
+  d3w:{grade:'退稿', title:'證據不足，退稿', edit:'「家裡出事」是猜的。回去把證據補齊。'},
+  d4s:{grade:'深度報導', title:'你寫出了完整的結構', edit:'債務、減班、換不了雇主。沒有一個人是壞人，但每一環都把他往外推。這是一篇好稿子。'},
+  d4w:{grade:'方向對了', title:'方向對了，證據補齊再來', edit:'你抓到重點了，但推論和證據還不夠，撐不起這麼大的結論。'},
+  hidden:{grade:'隱藏結局', title:'你聯絡上阿迪了', edit:'透過社工，阿迪願意說話：「我不是想逃。我只是不知道還能怎麼辦。」'}
+};
+const ENDING_KEYS = Object.keys(ENDINGS);
+
+/* ====== 狀態 ====== */
+const $ = s => document.querySelector(s);
+let S;
+function reset(){ S = {points:START_POINTS, clues:new Set([1]), deds:new Set(), done:new Set(), sel:[], fresh:new Set()}; }
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  $('#sr').textContent = ''; setTimeout(() => { $('#sr').textContent = msg; }, 30);
+  clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+function renderTop(){
+  const hrs = S.points * HOURS_PER_POINT;
+  $('#hours').textContent = '距截稿 ' + String(hrs).padStart(2,'0') + ':00';
+  $('#dots').innerHTML = Array.from({length:START_POINTS}, (_,i) => `<span class="dot ${i >= S.points ? 'used' : ''}"></span>`).join('');
+  $('#clue-n').textContent = S.clues.size + '/12';
+}
+
+function locState(l){
+  if (S.done.has(l.id)) return 'done';
+  if (l.req && ((l.req.clue && !S.clues.has(l.req.clue)) || (l.req.ded && !S.deds.has(l.req.ded)))) return 'locked';
+  return 'open';
+}
+
+function renderGo(){
+  $('#view-go').innerHTML = LOCS.map(l => {
+    const st = locState(l);
+    const place = st === 'locked' ? l.req.text : st === 'done' ? '已採訪' : l.place;
+    const cost = st === 'done' ? '✓' : l.cost + ' 點';
+    return `<button class="loc ${st === 'open' ? '' : st}" data-loc="${l.id}" ${st === 'open' ? '' : 'aria-disabled="true"'}>
+      <span class="loc-name">${l.name}</span><span class="loc-place">${place}</span><span class="cost">${cost}</span></button>`;
+  }).join('');
+}
+
+function clueBody(c){
+  if (c.kind === 'doc') return `<div class="doc">${c.rows.map((r,i) => `<span class="${i === c.rows.length-1 ? 'total' : ''}">${r[0]}</span><span class="${i === c.rows.length-1 ? 'total' : ''}">${r[1]}</span>`).join('')}</div><p class="note">示意數字，待查核</p>`;
+  if (c.kind === 'chat') return `<div class="chat">${c.msgs.map(m => { const me = m.length === 3; return `<div class="msg ${me ? 'me' : ''}"><span class="who">${m[0]}</span>${me ? m[2] : m[1]}</div>`; }).join('')}</div>`;
+  return `<p>${c.body}</p>`;
+}
+
+function renderBoard(){
+  const deds = DEDS.filter(d => S.deds.has(d.id));
+  $('#deds').innerHTML = deds.length ? deds.map(d => `<div class="ded"><b>${d.title}</b>：${d.text}<small>線索 ${d.pair[0]} ＋ ${d.pair[1]}</small></div>`).join('')
+    : `<div class="empty">還沒有推論。找到兩條看起來有關的線索，把它們連起來。</div>`;
+  const ids = [...S.clues].sort((a,b) => a-b);
+  $('#clues').innerHTML = ids.map(id => { const c = CLUES[id]; return `<button class="clue ${S.sel.includes(id) ? 'sel' : ''} ${S.fresh.has(id) ? 'new' : ''}" data-clue="${id}" aria-pressed="${S.sel.includes(id)}">
+    <div class="clue-head"><span class="clue-no">#${id}</span><span class="clue-title">${c.title}</span><span class="clue-src">${c.src}</span></div>${clueBody(c)}</button>`; }).join('');
+  S.fresh.clear();
+  $('#connect').disabled = S.sel.length !== 2;
+}
+
+function renderAll(){ renderTop(); renderGo(); renderBoard(); }
+
+function showTab(which){
+  for (const k of ['go','board']){ const t = $('#tab-' + k); t.setAttribute('aria-selected', which === k); t.tabIndex = which === k ? 0 : -1; }
+  $('#view-go').hidden = which !== 'go';
+  $('#view-board').hidden = which !== 'board';
+  window.scrollTo(0,0);
+}
+
+function visit(id){
+  const l = LOCS.find(x => x.id === id); const st = locState(l);
+  if (st === 'locked'){ toast(l.req.text); return; }
+  if (st === 'done') return;
+  if (S.points < l.cost){ toast('時間不夠了，只剩 ' + S.points * HOURS_PER_POINT + ' 小時。可以去線索板推論，或直接交稿。'); return; }
+  S.points -= l.cost; S.done.add(id);
+  l.gives.forEach(c => { S.clues.add(c); S.fresh.add(c); });
+  renderAll();
+  toast('拿到新線索：' + l.gives.map(c => CLUES[c].title).join('、'));
+}
+
+function toggleClue(id){
+  const i = S.sel.indexOf(id);
+  if (i >= 0) S.sel.splice(i,1);
+  else { if (S.sel.length === 2) S.sel.shift(); S.sel.push(id); }
+  renderBoard();
+}
+
+function connect(){
+  const [a,b] = S.sel;
+  const d = DEDS.find(x => x.pair.includes(a) && x.pair.includes(b));
+  S.sel = [];
+  if (d && S.deds.has(d.id)){ toast('這個推論已經有了。'); }
+  else if (d){
+    S.deds.add(d.id);
+    toast('新推論：' + d.title + (d.id === 'D' ? '（解鎖新的採訪）' : ''));
+  } else {
+    const hint = DEDS.find(x => !S.deds.has(x.id) && x.pair.every(c => S.clues.has(c)));
+    toast('這兩條看不出關聯。' + (hint ? '主編提示：看看「' + CLUES[hint.pair[0]].title + '」。' : ''));
+  }
+  renderAll();
+}
+
+function openSubmit(){
+  const ids = [...S.clues].filter(id => id !== 1).sort((a,b) => a-b);
+  $('#submit-sheet').innerHTML = `
+    <div class="label">交稿</div>
+    <h2>你的報導方向是？</h2>
+    <div class="list">${DIRS.map(d => `<label class="opt"><input type="radio" name="dir" id="dir-${d.id}" value="${d.id}"><span>${d.text}</span></label>`).join('')}</div>
+    <h2 style="font-size:22px">附上 2–3 條證據</h2>
+    <div class="list">${ids.length ? ids.map(id => `<label class="opt"><input type="checkbox" name="ev" id="ev-${id}" value="${id}"><span>#${id} ${CLUES[id].title}</span></label>`).join('') : '<div class="empty">你還沒有任何證據。先去採訪吧。</div>'}</div>
+    <div class="dock-in" style="margin:0">
+      <button class="btn" id="back">再查一下</button>
+      <button class="btn primary" id="send" disabled>送出稿子</button>
+    </div>`;
+  lockBg(true);
+  $('#submit-view').hidden = false; $('#submit-view').scrollTo(0,0);
+  const check = () => {
+    const evs = [...document.querySelectorAll('input[name=ev]:checked')];
+    document.querySelectorAll('input[name=ev]').forEach(x => { x.disabled = !x.checked && evs.length >= 3; });
+    $('#send').disabled = !(document.querySelector('input[name=dir]:checked') && evs.length >= 2);
+  };
+  $('#submit-sheet').onchange = check;
+  $('#back').addEventListener('click', () => { $('#submit-view').hidden = true; lockBg(false); });
+  $('#back').focus({preventScroll:true});
+  $('#send').addEventListener('click', () => {
+    const dir = DIRS.find(d => d.id === document.querySelector('input[name=dir]:checked').value);
+    const evs = [...document.querySelectorAll('input[name=ev]:checked')].map(x => +x.value);
+    judge(dir, evs);
+  });
+}
+
+function judge(dir, evs){
+  const hits = evs.filter(e => dir.support.includes(e)).length;
+  const strong = hits >= dir.need && (!dir.needDeds || S.deds.size >= dir.needDeds);
+  let key = dir.id + (strong ? 's' : 'w');
+  if (key === 'd4s' && [5,11,12].every(c => S.clues.has(c))) key = 'hidden';
+  let seen = new Set();
+  try { seen = new Set(JSON.parse(localStorage.getItem('adi-endings') || '[]')); seen.add(key); localStorage.setItem('adi-endings', JSON.stringify([...seen])); } catch(e){ seen.add(key); }
+  const e = ENDINGS[key];
+  const used = START_POINTS - S.points;
+  $('#end-sheet').innerHTML = `
+    <div class="grade">${e.grade}</div>
+    <h2>${e.title}</h2>
+    <div class="editor"><span class="who">主編評語</span><span>${e.edit}</span></div>
+    <div class="stats">
+      <div class="stat"><b>${S.clues.size}/12</b><span>蒐集的線索</span></div>
+      <div class="stat"><b>${S.deds.size}/5</b><span>做出的推論</span></div>
+      <div class="stat"><b>${used * HOURS_PER_POINT}h</b><span>花掉的時間</span></div>
+    </div>
+    <div class="editor"><span class="who">結局圖鑑</span><span>已解鎖 ${seen.size} / ${ENDING_KEYS.length} 種結局</span></div>
+    <div class="editor"><span class="who">數據卡（示意）</span><span>行蹤不明移工的人數與主要原因、仲介費與轉換雇主的規定。</span><span class="note">官方數字與來源待新聞部提供。</span></div>
+    <button class="btn primary" id="again">重新調查一次</button>
+    <p class="note">試玩回饋：你會想再查一次嗎？哪一步卡住最久？</p>`;
+  $('#submit-view').hidden = true; $('#end').hidden = false; $('#end').scrollTo(0,0);
+  $('#again').addEventListener('click', begin);
+  $('#again').focus({preventScroll:true});
+}
+
+function begin(){
+  reset(); renderAll(); showTab('go'); lockBg(false);
+  $('#intro').hidden = true; $('#end').hidden = true; $('#submit-view').hidden = true;
+}
+
+$('#view-go').addEventListener('click', e => { const b = e.target.closest('[data-loc]'); if (b) visit(b.dataset.loc); });
+$('#clues').addEventListener('click', e => { const b = e.target.closest('[data-clue]'); if (b) toggleClue(+b.dataset.clue); });
+function lockBg(on){ document.querySelectorAll('.deadline,.app,.dock').forEach(e => { e.inert = on; }); }
+$('#tab-go').addEventListener('click', () => showTab('go'));
+$('#tab-board').addEventListener('click', () => showTab('board'));
+$('.tabs').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const next = e.target.id === 'tab-go' ? 'board' : 'go';
+  showTab(next); $('#tab-' + next).focus(); e.preventDefault();
+});
+$('#connect').addEventListener('click', connect);
+$('#submit').addEventListener('click', openSubmit);
+$('#begin').addEventListener('click', begin);
+reset(); renderAll();
+</script>
+</body>
+</html>

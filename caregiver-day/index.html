@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, nofollow">
+<title>看護的一天</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ground:#EEF0F5; --surface:#FFFFFF; --ink:#1F2230; --muted:#5F6679; --line:#D9DCE6;
+  --accent:#3F5BD8; --accent-ink:#FFFFFF;
+  --grandma:#D2555A; --boss:#C07F12; --home:#7A5CC9; --self:#2A9479;
+  --warn:#D2555A; --badge-ink:#FFFFFF;
+  color-scheme:light;
+  --display:"LXGW WenKai TC","Kaiti TC","STKaiti","DFKai-SB",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#14161F; --surface:#1E212D; --ink:#ECEEF5; --muted:#9AA1B5; --line:#2E3242;
+    --accent:#8DA2FF; --accent-ink:#10132B;
+    --grandma:#F0787C; --boss:#E6AE4A; --home:#A98DF0; --self:#52C7A8; --warn:#F0787C; --badge-ink:#14161F;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#14161F; --surface:#1E212D; --ink:#ECEEF5; --muted:#9AA1B5; --line:#2E3242;
+  --accent:#8DA2FF; --accent-ink:#10132B;
+  --grandma:#F0787C; --boss:#E6AE4A; --home:#A98DF0; --self:#52C7A8; --warn:#F0787C; --badge-ink:#14161F;
+}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;-webkit-text-size-adjust:100%;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-inline:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.app{max-width:440px;margin:0 auto;height:100%;height:100dvh;display:flex;flex-direction:column;gap:12px;padding-block:12px}
+button{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+
+/* 天色：一天的時間 */
+.sky{border-radius:18px;padding:14px 16px 16px;color:#1B1E2E;transition:color .6s;display:flex;flex-direction:column;gap:12px}
+.sky.night{color:#F4F3FF}
+.sky-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.clock{font-family:var(--display);font-size:44px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.day{font-family:var(--display);font-size:17px;opacity:.85}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.meter{display:flex;flex-direction:column;gap:4px}
+.meter-label{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.04em;font-weight:500}
+.bar{height:8px;border-radius:99px;background:rgba(255,255,255,.55);overflow:hidden}
+.sky.night .bar{background:rgba(255,255,255,.18)}
+.fill{height:100%;border-radius:99px;transition:width .25s}
+.fill.g{background:var(--grandma)} .fill.b{background:var(--boss)}
+.meter.hit .bar{animation:hit .45s}
+@keyframes hit{0%,100%{transform:none}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.self-chip{font-size:12px;display:flex;align-items:center;gap:6px;opacity:.8}
+.self-dot{width:8px;height:8px;border-radius:50%;background:var(--self)}
+.self-chip.low .self-dot{background:var(--warn);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+
+/* 正在做的事 */
+.busy{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:6px;min-height:58px;justify-content:center}
+.busy-text{font-size:14px;color:var(--muted)}
+.busy-text b{color:var(--ink);font-weight:700}
+.busy-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.busy-fill{height:100%;background:var(--accent);width:0}
+.busy.nudge{animation:hit .4s}
+
+/* 任務卡 */
+.queue-head{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.queue{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent;display:flex;flex-direction:column;gap:8px;padding-bottom:8px}
+.task{display:grid;grid-template-columns:40px 1fr 46px;align-items:center;gap:12px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;cursor:pointer;animation:pop .22s ease-out}
+.task:active{transform:scale(.98)}
+@media (hover:hover){.task:hover{border-color:var(--accent)}.primary:hover{filter:brightness(1.08)}}
+@keyframes pop{from{transform:translateY(8px);opacity:.3}to{transform:none;opacity:1}}
+.task.gone{animation:gone .3s forwards;pointer-events:none}
+@keyframes gone{to{opacity:0;transform:translateX(30px)}}
+.badge{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-family:var(--display);font-size:20px;font-weight:700;color:var(--badge-ink)}
+.c-嬤{background:var(--grandma)} .c-雇{background:var(--boss)} .c-家{background:var(--home)} .c-廚{background:var(--boss)} .c-我{background:var(--self)}
+.task-title{font-weight:700;font-size:15px}
+.task-sub{font-size:12px;color:var(--muted)}
+.task-hint{font-size:12px;color:var(--accent);font-weight:500}
+.ring{--p:1;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--rc,var(--accent)) calc(var(--p)*360deg),var(--line) 0)}
+.ring span{width:32px;height:32px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.ring.urgent{--rc:var(--warn)}
+.ring.none{background:none;border:1px dashed var(--line)}
+.ring.none span{font-size:11px;color:var(--muted);font-weight:500}
+
+/* 開始／結算畫面 */
+.overlay{position:fixed;inset:0;background:var(--ground);z-index:10;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) 16px max(24px,env(safe-area-inset-bottom,0px))}
+.sheet{max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.kicker{font-size:12px;letter-spacing:.12em;color:var(--muted)}
+h1{font-family:var(--display);font-size:40px;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-size:30px;line-height:1.2;margin:0;text-wrap:balance}
+.lead{font-size:16px;margin:0;max-width:34em}
+.rules{margin:0;padding:14px 16px 14px 34px;background:var(--surface);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.toggle{display:flex;align-items:center;gap:10px;font-size:14px;min-height:44px}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+.primary:active{transform:scale(.98)}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:14px 18px;font-size:17px;font-weight:700;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--display);font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.reveal{font-family:var(--display);font-size:19px;margin:0}
+.datacard{border:1px solid color-mix(in srgb,var(--grandma) 40%,var(--line));background:color-mix(in srgb,var(--grandma) 7%,var(--surface));border-radius:14px;padding:12px 14px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.datacard small{color:var(--muted);font-size:12px}
+.note{font-size:12px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app" id="app" inert>
+  <header class="sky" id="sky">
+    <div class="sky-top">
+      <div class="clock" id="clock">06:00</div>
+      <div class="day">第 1 天</div>
+    </div>
+    <div class="meters">
+      <div class="meter" id="m-g"><div class="meter-label"><span>阿嬤狀態</span><span id="v-g">100</span></div><div class="bar"><div class="fill g" id="f-g" style="width:100%"></div></div></div>
+      <div class="meter" id="m-b"><div class="meter-label"><span>雇主滿意度</span><span id="v-b">100</span></div><div class="bar"><div class="fill b" id="f-b" style="width:100%"></div></div></div>
+    </div>
+    <div class="self-chip" id="self"><span class="self-dot"></span><span id="self-text">Rina 體力還可以</span></div>
+  </header>
+
+  <section class="busy" id="busy" aria-live="polite">
+    <div class="busy-text" id="busy-text">Rina 有空。點下面的卡片，她就會去做。</div>
+    <div class="busy-bar"><div class="busy-fill" id="busy-fill"></div></div>
+  </section>
+
+  <div class="queue-head"><span>待辦（一次只能做一件）</span><span id="count">0 件</span></div>
+  <section class="queue" id="queue"></section>
+</div>
+
+<div class="overlay" id="start">
+  <div class="sheet">
+    <div class="kicker">第二款試玩版 · 時間管理</div>
+    <h1>看護的一天</h1>
+    <p class="lead">你是家庭看護 Rina，負責照顧阿嬤。從早上 6 點到半夜 12 點，事情會一件接一件來。撐完這一天。</p>
+    <ol class="rules">
+      <li>點卡片，Rina 就會去處理。她一次只能做一件事。</li>
+      <li>卡片右邊的圈圈是倒數，時間到沒處理就會扣分。</li>
+      <li>阿嬤狀態或雇主滿意度歸零，這一天就提早結束。</li>
+    </ol>
+    <label class="toggle"><input type="checkbox" id="easy"> 簡單模式（每件事的時限多 50%）</label>
+    <button class="primary" id="go">開始上工</button>
+    <p class="note">一局約 90 秒。這是內部試玩用的 demo，數值都還在調整。</p>
+  </div>
+</div>
+
+<div class="overlay" id="end" hidden>
+  <div class="sheet" id="end-sheet"></div>
+</div>
+
+<script>
+/* ====== 可調參數：試玩時改這裡就好 ====== */
+const CFG = {
+  dayStart: 6, dayEnd: 24,
+  secondsPerHour: 5,        // 實際 5 秒 = 遊戲裡 1 小時，整天 90 秒
+  drainIdle: 1.0,           // Rina 沒事時每秒掉的體力
+  drainBusy: 1.6,           // Rina 做事時每秒掉的體力
+  tiredAt: 25,              // 體力低於這個值，做事時間變 1.5 倍
+  slowFactor: 1.5,
+  collapseSec: 10,          // 體力 0 累積超過幾秒算「倒下」
+  easyFactor: 1.5,          // 簡單模式時限倍率
+  spawnStart: 6, spawnEnd: 3.2, // 隨機任務出現間隔（秒），從早到晚越來越密
+  tutorialSec: 8,
+  maxVideo: 2
+};
+const TASKS = {
+  bell:   {title:'阿嬤按鈴', subs:['想喝水','要翻身','叫你過去一下'], cat:'嬤', proc:2, limit:6,  fail:{g:-10}, done:{g:2}, w:5},
+  diaper: {title:'換尿布',   sub:'阿嬤不舒服了', cat:'嬤', proc:3, limit:8,  fail:{g:-15}, done:{g:3}, w:3},
+  chat:   {title:'陪阿嬤聊天', sub:'不做也不會扣分', cat:'嬤', proc:3, limit:10, fail:{}, done:{g:10}, w:1.5},
+  errand: {title:'雇主傳訊息', subs:['「順便把車洗一洗」','「客廳再拖一次」','「下午去店裡幫忙顧一下」','「晚上多煮兩個人的份」'], cat:'雇', proc:4, limit:12, fail:{b:-15}, done:{b:4}, w:2.5},
+  video:  {title:'家鄉視訊', sub:'媽媽打來了', cat:'家', proc:3, limit:10, fail:{m:-15}, done:{m:10}, w:1},
+  med:    {title:'餵藥', sub:'固定時間，不能晚', cat:'嬤', proc:1, limit:5, fail:{g:-20}, done:{}},
+  meal:   {title:'煮飯', sub:'全家的飯', cat:'廚', proc:5, limit:15, fail:{b:-10,g:-5}, done:{b:3}},
+  eat:    {title:'自己吃飯', sub:'不會倒數，也不會有人催', cat:'我', proc:2, limit:null, fail:{}, done:{s:30}},
+  rest:   {title:'小睡一下', sub:'不會倒數，也不會有人催', cat:'我', proc:4, limit:null, fail:{}, done:{s:40}}
+};
+const FIXED = [[7,'meal'],[7.5,'eat'],[8,'med'],[11.5,'meal'],[12,'med'],[12.5,'eat'],[14,'rest'],[18,'meal'],[19,'eat'],[20,'med'],[22,'rest']];
+const RANDOM = ['bell','diaper','chat','errand','video'];
+const LABEL = {g:'阿嬤', b:'雇主', s:'體力', m:'心情'};
+
+const $ = s => document.querySelector(s);
+const clamp = v => Math.max(0, Math.min(100, v));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const DAY_SEC = (CFG.dayEnd - CFG.dayStart) * CFG.secondsPerHour;
+let S = null, last = 0, uid = 0;
+
+function newState(easy){
+  return {t:0, g:100, b:100, s:100, m:100, tasks:[], busy:null, next:CFG.tutorialSec, easy,
+          videos:0, fixedIdx:0, over:false,
+          stats:{meals:0, rests:0, missedVideo:0, done:0, missed:0, zero:0}};
+}
+const hourAt = t => CFG.dayStart + t / CFG.secondsPerHour;
+function fmt(h){ const hh = Math.min(24, Math.floor(h)); const mm = hh >= 24 ? 0 : Math.floor((h - hh) * 6) * 10; return String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0'); }
+
+function effectText(fx){
+  const parts = Object.entries(fx).map(([k,v]) => LABEL[k] + (v > 0 ? ' +' : ' ') + v);
+  return parts.join('、');
+}
+
+function spawn(type, hint){
+  const d = TASKS[type];
+  if (type === 'eat' || type === 'rest'){ // 同類只留一張：上一餐沒吃就算錯過
+    const old = S.tasks.find(x => x.type === type);
+    if (old) removeTask(old);
+  }
+  const limit = d.limit ? d.limit * (S.easy ? CFG.easyFactor : 1) : null;
+  const task = {id:++uid, type, title:d.title, sub: d.subs ? pick(d.subs) : d.sub, limit, remain:limit, hint};
+  S.tasks.push(task);
+  mount(task);
+}
+
+function mount(task){
+  const d = TASKS[task.type];
+  const el = document.createElement('button');
+  el.className = 'task'; el.id = 'task-' + task.id; el.type = 'button';
+  const failTxt = Object.keys(d.fail).length ? '逾時：' + effectText(d.fail) : (d.done.s ? '做完：體力 +' + d.done.s : '做完：' + effectText(d.done));
+  el.innerHTML =
+    `<div class="badge c-${d.cat}">${d.cat}</div>
+     <div><div class="task-title">${task.title}</div><div class="task-sub">${task.sub}</div>
+     <div class="${task.hint ? 'task-hint' : 'task-sub'}">${task.hint || failTxt}</div></div>
+     <div class="ring ${task.limit ? '' : 'none'}"><span>${task.limit ? Math.ceil(task.remain) : '不急'}</span></div>`;
+  el.addEventListener('click', () => startTask(task));
+  $('#queue').appendChild(el);
+  task.el = el; task.ring = el.querySelector('.ring'); task.num = el.querySelector('.ring span');
+}
+
+function removeTask(task){
+  S.tasks = S.tasks.filter(x => x !== task);
+  if (task.el){ task.el.classList.add('gone'); const e = task.el; setTimeout(() => e.remove(), 300); }
+}
+
+function apply(fx){
+  for (const [k,v] of Object.entries(fx)){
+    S[k] = clamp(S[k] + v);
+    if (v < 0 && (k === 'g' || k === 'b')){ const m = $('#m-' + k); m.classList.remove('hit'); void m.offsetWidth; m.classList.add('hit'); }
+  }
+}
+
+function startTask(task){
+  if (S.over || !S.tasks.includes(task)) return;
+  if (S.busy){
+    const b = $('#busy'); b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
+    return;
+  }
+  removeTask(task);
+  const d = TASKS[task.type];
+  const total = d.proc * (S.s < CFG.tiredAt ? CFG.slowFactor : 1);
+  S.busy = {task, remain: total, total};
+}
+
+function finishBusy(){
+  const {task} = S.busy; const d = TASKS[task.type];
+  apply(d.done); S.stats.done++;
+  if (task.type === 'eat') S.stats.meals++;
+  if (task.type === 'rest') S.stats.rests++;
+  S.busy = null;
+}
+
+function failTask(task){
+  const d = TASKS[task.type];
+  apply(d.fail); S.stats.missed++;
+  if (task.type === 'video') S.stats.missedVideo++;
+  removeTask(task);
+}
+
+function spawnRandom(){
+  const pool = RANDOM.filter(k => k !== 'video' || S.videos < CFG.maxVideo);
+  const total = pool.reduce((a,k) => a + TASKS[k].w, 0);
+  let r = Math.random() * total;
+  for (const k of pool){ r -= TASKS[k].w; if (r <= 0){ if (k === 'video') S.videos++; spawn(k); return; } }
+}
+
+function update(dt){
+  S.t += dt;
+  S.s = clamp(S.s - (S.busy ? CFG.drainBusy : CFG.drainIdle) * dt);
+  if (S.s <= 0) S.stats.zero += dt;
+
+  if (S.busy){ S.busy.remain -= dt; if (S.busy.remain <= 0) finishBusy(); }
+  for (const task of [...S.tasks]){
+    if (task.limit == null) continue;
+    task.remain -= dt;
+    if (task.remain <= 0) failTask(task);
+  }
+  const h = hourAt(S.t);
+  while (S.fixedIdx < FIXED.length && h >= FIXED[S.fixedIdx][0]){ spawn(FIXED[S.fixedIdx][1]); S.fixedIdx++; }
+  if (S.t >= S.next){
+    spawnRandom();
+    const p = Math.min(1, S.t / DAY_SEC);
+    S.next = S.t + (CFG.spawnStart + (CFG.spawnEnd - CFG.spawnStart) * p) + (Math.random() - .5) * 1.6;
+  }
+  if (S.g <= 0) return end('hospital');
+  if (S.b <= 0) return end('complaint');
+  if (S.t >= DAY_SEC) return end(null);
+}
+
+/* 天色：依遊戲時間插值 */
+const SKY = [[6,'#F9C79A','#B9D3F5'],[9,'#BCDAFA','#E4F0FD'],[15,'#CBE1FA','#EDF4FD'],[17.5,'#F6A57E','#9A87D6'],[19.5,'#3A3F78','#1F2350'],[24,'#141733','#0A0C1F']];
+function mix(a,b,t){ const pa = parseInt(a.slice(1),16), pb = parseInt(b.slice(1),16); return [16,8,0].map(s => Math.round(((pa>>s)&255)*(1-t) + ((pb>>s)&255)*t)); }
+const rgb = c => 'rgb(' + c.join(',') + ')';
+const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v + .055)/1.055, 2.4); }; return .2126*f(c[0]) + .7152*f(c[1]) + .0722*f(c[2]); };
+const contrast = (a,b) => (Math.max(a,b) + .05) / (Math.min(a,b) + .05);
+const INK_DARK = .013, INK_LIGHT = .9; // #1B1E2E、#F4F3FF 的相對亮度
+function sky(h){
+  let i = 0; while (i < SKY.length - 2 && h >= SKY[i+1][0]) i++;
+  const [h0,a0,b0] = SKY[i], [h1,a1,b1] = SKY[i+1];
+  const t = Math.max(0, Math.min(1, (h - h0) / (h1 - h0)));
+  const top = mix(a0,a1,t), bottom = mix(b0,b1,t), lt = lum(top), lb = lum(bottom);
+  // 文字深淺看漸層上最難讀的一端，哪個顏色在兩端的最差對比較高就用哪個
+  const night = Math.min(contrast(INK_LIGHT,lt), contrast(INK_LIGHT,lb)) > Math.min(contrast(INK_DARK,lt), contrast(INK_DARK,lb));
+  return {top: rgb(top), bottom: rgb(bottom), night};
+}
+
+let busyHtml = '';
+function setBusy(html){ if (html !== busyHtml){ busyHtml = html; $('#busy-text').innerHTML = html; } } // aria-live：只在文字真的變了才寫入
+
+function render(){
+  const h = hourAt(S.t);
+  $('#clock').textContent = fmt(h);
+  const c = sky(h); const el = $('#sky');
+  el.style.background = `linear-gradient(160deg, ${c.top}, ${c.bottom})`;
+  el.classList.toggle('night', c.night);
+  for (const k of ['g','b']){ $('#f-' + k).style.width = S[k] + '%'; $('#v-' + k).textContent = Math.round(S[k]); }
+  const low = S.s < CFG.tiredAt;
+  $('#self').classList.toggle('low', low);
+  $('#self-text').textContent = S.s <= 0 ? 'Rina 快撐不住了' : low ? 'Rina 很累，動作變慢了' : S.s < 60 ? 'Rina 有點累' : 'Rina 體力還可以';
+  if (S.busy){
+    setBusy(`Rina 正在：<b>${S.busy.task.title}</b>`);
+    $('#busy-fill').style.width = (100 * (1 - S.busy.remain / S.busy.total)) + '%';
+  } else {
+    setBusy(S.tasks.length ? 'Rina 有空。點一張卡片。' : 'Rina 有空。');
+    $('#busy-fill').style.width = '0';
+  }
+  for (const t of S.tasks){
+    if (t.limit == null) continue;
+    t.ring.style.setProperty('--p', Math.max(0, t.remain / t.limit));
+    t.ring.classList.toggle('urgent', t.remain < 3);
+    t.num.textContent = Math.max(0, Math.ceil(t.remain));
+  }
+  $('#count').textContent = S.tasks.length + ' 件';
+}
+
+let timer = 0;
+function tick(){
+  const now = performance.now();
+  const dt = Math.min(0.25, (now - last) / 1000); last = now;
+  if (!S || S.over){ clearInterval(timer); return; }
+  if (document.hidden) return; // 切到背景就暫停
+  update(dt);
+  if (!S.over) render();
+}
+
+const ENDINGS = {
+  perfect:   {title:'阿嬤很好，雇主很滿意。那你呢？', sub:'你把這一天顧得很好，除了你自己。'},
+  balance:   {title:'這種日子，很少見', sub:'阿嬤、雇主、你自己都顧到了。現實中很難天天如此。'},
+  survive:   {title:'又撐過了一天', sub:'不完美，但一天就這樣過去了。明天還有一天。'},
+  collapse:  {title:'你倒下了', sub:'體力耗盡還在繼續做事。明天早上 6 點，鬧鐘一樣會響。'},
+  complaint: {title:'仲介打電話來了', sub:'雇主不滿意，投訴到仲介那裡。'},
+  hospital:  {title:'一個人顧不過來', sub:'阿嬤被送去醫院了。事情同時湧進來，只有你一個人。'}
+};
+
+function end(kind){
+  S.over = true;
+  const st = S.stats;
+  if (!kind){
+    if (st.zero >= CFG.collapseSec) kind = 'collapse';
+    else if (S.g >= 70 && S.b >= 70 && st.meals >= 2 && S.s >= 40 && S.m >= 60) kind = 'balance';
+    else if (S.g >= 70 && S.b >= 70) kind = 'perfect';
+    else kind = 'survive';
+  }
+  let plays = 1;
+  try { plays = (parseInt(localStorage.getItem('caregiver-plays') || '0', 10) || 0) + 1; localStorage.setItem('caregiver-plays', String(plays)); } catch(e){}
+  const e = ENDINGS[kind];
+  const reached = fmt(hourAt(Math.min(S.t, DAY_SEC)));
+  $('#end-sheet').innerHTML = `
+    <div class="kicker">第 1 天 · ${reached} 結束 · 第 ${plays} 次上工</div>
+    <h2>${e.title}</h2>
+    <p class="lead">${e.sub}</p>
+    <div class="stats">
+      <div class="stat"><b>${Math.round(S.g)}</b><span>阿嬤狀態</span></div>
+      <div class="stat"><b>${Math.round(S.b)}</b><span>雇主滿意度</span></div>
+      <div class="stat"><b>${st.done}</b><span>做完的事</span></div>
+    </div>
+    <p class="reveal">但這一天，Rina 自己——</p>
+    <div class="stats">
+      <div class="stat"><b>${st.meals}/3</b><span>吃了幾餐</span></div>
+      <div class="stat"><b>${st.rests}</b><span>休息幾次</span></div>
+      <div class="stat"><b>${st.missedVideo}</b><span>錯過媽媽的視訊</span></div>
+    </div>
+    <div class="datacard">
+      <b>家庭看護不適用《勞動基準法》</b>
+      <span>工時與休假由契約約定，常見整天待命、夜間也要起來照顧。</span>
+      <small>數據卡示意，實際數字與官方來源待新聞部提供。</small>
+    </div>
+    <button class="primary" id="again">再上工一次</button>
+    <p class="note">試玩回饋：你會想再玩一局嗎？哪裡最手忙腳亂？</p>`;
+  $('#app').inert = true;
+  $('#end').hidden = false;
+  $('#again').addEventListener('click', start);
+  $('#again').focus({preventScroll:true});
+}
+
+function start(){
+  $('#queue').innerHTML = '';
+  S = newState($('#easy').checked);
+  $('#start').hidden = true; $('#end').hidden = true; $('#app').inert = false;
+  spawn('bell', '點這張卡，Rina 就會去處理');
+  render();
+  last = performance.now();
+  clearInterval(timer);
+  timer = setInterval(tick, 50);
+}
+$('#go').addEventListener('click', start);
+document.addEventListener('visibilitychange', () => { last = performance.now(); });
+</script>
+</body>
+</html>
